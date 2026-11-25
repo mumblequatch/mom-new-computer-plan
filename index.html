@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your new computer: a plan</title>
+<style>
+  body { font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; color: #222; line-height: 1.5; font-size: 17px; max-width: 680px; margin: 40px auto; padding: 0 20px; }
+  h1 { color: #2E5E8C; font-size: 30px; margin: 0 0 4px; }
+  .sub { color: #666; margin: 0 0 24px; }
+  h2 { color: #2E5E8C; font-size: 20px; margin: 28px 0 6px; }
+  p { margin: 0 0 8px; }
+  ul { margin: 0; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+</style>
+<!-- Plausible Analytics -->
+<script async src="https://plausible.io/js/pa-l22G6JEP7wvc_HwvZWRQ-.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+</head>
+<body>
+<h1>Your new computer: a plan</h1>
+<p class="sub">For you to read and comment on. Nothing is bought or decided yet.</p>
+
+<h2>Why a new one</h2>
+<p>Your MacBook Pro is from 2015. Apple stopped sending security fixes for the newest system it can run in July 2024, and the Brave browser and the AI assistant I'd want you to have no longer install on it. It can be patched with unofficial software, but then I'd have to handle every update by hand, and it still wouldn't be as safe as a Mac Apple supports.</p>
+
+<h2>What I'd suggest</h2>
+<p><b>MacBook Air, 13-inch, with the M5 chip</b> (16 GB memory, 512 GB storage). It's light, quiet, the battery lasts all day, and Apple will keep it updated for years.</p>
+
+<h2>What would be on it</h2>
+<ul>
+<li><b>Brave</b>, for the web. It blocks ads and trackers on its own.</li>
+<li><b>Mail</b>, Apple's built-in email, set up with your current account.</li>
+<li><b>An AI digital assistant</b> capable of anything a Claude or Muse can do: research, help with the computer, making appointments, and more.</li>
+<li><b>Pages</b>, for writing documents. It opens and saves Word files.</li>
+<li><b>A password manager</b> (Apple Passwords or Bitwarden) to remember every password for you.</li>
+<li><b>AnyDesk</b>, so I can see your screen and fix things from my house when you ask.</li>
+</ul>
+
+<h2>How it stays secure</h2>
+<ul>
+<li>Updates install themselves.</li>
+<li>The drive is encrypted, so a lost laptop doesn't expose your files.</li>
+<li>Every password lives in the password manager, and each one is different.</li>
+<li>Only I can connect remotely, and you never have to type a code to let me in.</li>
+</ul>
+
+<h2>What you'd do</h2>
+<p>Almost nothing. I set it up and move your files over, and you sign in to your email and Apple account when I ask.</p>
+
+<h2>Questions for you</h2>
+<ul>
+<li>Is there anything else you use on your computer now that you'd want to keep?</li>
+<li>Which email address do you use most?</li>
+<li>Do you exchange Word documents with anyone?</li>
+</ul>
+
+<script data-engagement-beacon="7">
+// Blocker-proof engagement beacon — see ~/Scripts/inject_beacon.py
+(function(){
+  var BEACON = 'https://media.thomaswoodrow.com/_e';
+  // The page's own tracking is left alone. These say which Plausible events it
+  // does NOT already fire, so the shim fills the gaps without double-counting.
+  var P_PLAY = true, P_MILESTONES = true, P_CARDS = true;
+  var sent = {};
+  // Plausible milestones keep their own dedupe: the server records every 10%,
+  // but the dashboard still gets 25/50/75 so its existing goals and history
+  // stay comparable. Two ladders, one pass.
+  var sentP = {};
+
+  function plaus(name, props){
+    if (typeof window.plausible === 'function') window.plausible(name, { props: props || {} });
+  }
+
+  function slug(){
+    var parts = location.pathname.split('/').filter(Boolean);
+    var first = parts[0] || 'root';
+    return first.replace(/\.html?$/i, '');
+  }
+  // The code rides on the URL, but only on the page that was actually linked.
+  // Click deeper into the same site and it's gone from location.search — so
+  // fall back to the referring page, which still carries it.
+  function refCode(){
+    var here = new URLSearchParams(location.search).get('ref');
+    if (here) return here;
+    try {
+      if (!document.referrer) return null;
+      var r = new URL(document.referrer);
+      if (r.origin !== location.origin) return null;   // only trust our own pages
+      return r.searchParams.get('ref');
+    } catch (err) { return null; }
+  }
+  // Raw fire — no dedupe. Used by dwell (repeats with a growing total) and
+  // clicks (each distinct link is its own event).
+  function sendRaw(event, pct){
+    try {
+      var q = new URLSearchParams({ e: event, s: slug(), p: String(Math.round(pct || 0)) });
+      var ref = refCode();
+      if (ref) q.set('ref', ref);
+      var u = BEACON + '?' + q.toString();
+      if (navigator.sendBeacon) navigator.sendBeacon(u);
+      else fetch(u, { keepalive: true, mode: 'no-cors' });
+    } catch (err) { /* tracking must never break the page */ }
+  }
+  // Once-per-event — for milestones that should fire exactly once (open, play,
+  // 25/50/75/complete, each card reached).
+  function send(event, pct){
+    if (sent[event]) return;
+    sent[event] = 1;
+    sendRaw(event, pct);
+  }
+
+  send('open', 0);
+
+  // ---- media depth -------------------------------------------------------
+  var st = new WeakMap();
+  function state(el){
+    if (!st.has(el)) st.set(el, { heard: 0, last: null });
+    return st.get(el);
+  }
+  function isMedia(el){ return el && (el.tagName === 'AUDIO' || el.tagName === 'VIDEO'); }
+  // The reel player swaps src via load(); each track counts from zero.
+  document.addEventListener('loadstart', function(e){
+    if (isMedia(e.target)) st.set(e.target, { heard: 0, last: null });
+  }, true);
+  function label(el){ return el.tagName === 'VIDEO' ? 'Video' : 'Audio'; }
+  document.addEventListener('play', function(e){
+    if (!isMedia(e.target)) return;
+    if (!sent.play && P_PLAY) plaus(label(e.target) + ' Play', { page: document.title });
+    send('play', 0);
+  }, true);
+  document.addEventListener('timeupdate', function(e){
+    var el = e.target;
+    if (!isMedia(el) || !isFinite(el.duration) || !el.duration) return;
+    var s = state(el), now = el.currentTime;
+    if (s.last !== null) {
+      // A real gap between timeupdates is small; anything bigger is a seek.
+      // Scale by playbackRate or someone listening at 2x reads as a scrubber.
+      var d = now - s.last, lim = 1.5 * Math.max(1, el.playbackRate);
+      if (d > 0 && d < lim) s.heard += d;
+    }
+    s.last = now;
+    var pct = s.heard / el.duration * 100;
+    // Every 10%. Quartiles are too coarse for long-form: on a 27-minute
+    // chapter the first checkpoint was ~7 minutes in, so anyone who listened
+    // for six minutes reported the same 0% as someone who bounced instantly.
+    [10, 20, 30, 40, 50, 60, 70, 80, 90].forEach(function(m){
+      if (pct < m) return;
+      send(String(m), m);
+    });
+    [25, 50, 75].forEach(function(m){
+      if (pct < m || sentP[m]) return;
+      sentP[m] = 1;
+      if (P_MILESTONES) plaus(label(el) + ' ' + m + '%', { page: document.title });
+    });
+  }, true);
+  document.addEventListener('ended', function(e){
+    if (!isMedia(e.target)) return;
+    if (!sent.complete && P_MILESTONES) plaus(label(e.target) + ' Completed', { page: document.title });
+    send('complete', 100);
+  }, true);
+
+  // ---- deck depth --------------------------------------------------------
+  // Same rule the deck's own Plausible tracking uses: the card whose band
+  // covers the viewport midline. Reports the furthest card reached, and which
+  // card is under the midline right now, for the per-card clock below.
+  //
+  // Three markup shapes, tried in order. This used to be section[data-card]
+  // alone, which is deck-template's shape — the DEPLOYED decks nest a card div
+  // inside a slide section instead, so the selector matched nothing and every
+  // deck recorded zero progress while looking like it worked. (Written without
+  // the literal markup: greps counting slides on a page must not match the
+  // tracker that counts them.)
+  var cards = document.querySelectorAll('section[data-card]');
+  if (!cards.length) cards = document.querySelectorAll('.deck .slide, main .slide');
+  if (!cards.length) cards = document.querySelectorAll('[data-card]');
+  // tickClock is assigned by the clock below. Calling it BEFORE curCard moves is
+  // what makes per-card time mean anything: the clock only wakes every 15s, so
+  // without this the whole interval is credited to whichever card happened to be
+  // on screen when it fired. A first run through the live deck proved it —
+  // 21 cards read, and the seconds landed on cards 17 and 20 alone.
+  var cardSecs = [], curCard = -1, tickClock = function(){};
+  if (cards.length && !/[?&]edit\b/.test(location.search)) {
+    var deepest = 0;
+    var checkCards = function(){
+      var mid = window.innerHeight / 2;
+      for (var i = 0; i < cards.length; i++) {
+        var r = cards[i].getBoundingClientRect();
+        if (r.top > mid || r.bottom < mid) continue;
+        if (i !== curCard) tickClock();     // credit the card being left
+        curCard = i;                       // where the clock accrues
+        if (i + 1 > deepest) {
+          deepest = i + 1;
+          if (P_CARDS) plaus('Card Viewed', { deck: document.title, card: deepest + '/' + cards.length });
+          // One event per card reached. pct is progress through the deck, so a
+          // half-read deck reads as 50 the same way half-heard audio does.
+          send('card' + deepest, deepest / cards.length * 100);
+        }
+        break;                             // one card owns the midline
+      }
+    };
+    addEventListener('scroll', checkCards, { passive: true });
+    addEventListener('resize', checkCards, { passive: true });
+    checkCards();
+  }
+
+  // ---- the activity clock: time on the page, and time per card -----------
+  // One clock drives both. Counts only visible, foregrounded seconds — a
+  // backgrounded tab doesn't accrue time — and attributes each tick to
+  // whichever card is under the viewport midline at that moment, so scrolling
+  // back to re-read a card adds to that card. Beaconed every 15s and on
+  // hide/unload, carrying cumulative totals in p, so the largest value
+  // server-side is the session total. Per-card events are 'cardt<N>'; only
+  // cards whose whole-second total changed are re-sent.
+  (function(){
+    var active = 0, last = Date.now(), visible = !document.hidden, sentSecs = [];
+    function tick(){
+      var now = Date.now(), d = (now - last) / 1000;
+      last = now;
+      // A gap far larger than the 15s cadence means sleep or a stalled timer,
+      // not reading. Dropping it keeps a laptop shut overnight from reading as
+      // eight hours on card 3.
+      if (!visible || d <= 0 || d > 60) return;
+      active += d;
+      if (curCard >= 0) cardSecs[curCard] = (cardSecs[curCard] || 0) + d;
+    }
+    tickClock = tick;   // so a card change settles the clock before moving on
+    function flush(){
+      tick();
+      if (active >= 1) sendRaw('dwell', active);
+      for (var i = 0; i < cardSecs.length; i++) {
+        var s = Math.round(cardSecs[i] || 0);
+        if (s >= 1 && s !== sentSecs[i]) { sentSecs[i] = s; sendRaw('cardt' + (i + 1), s); }
+      }
+    }
+    document.addEventListener('visibilitychange', function(){
+      tick(); visible = !document.hidden; last = Date.now();
+      if (document.hidden) flush();
+    });
+    addEventListener('pagehide', flush);
+    addEventListener('beforeunload', flush);
+    setInterval(flush, 15000);
+  })();
+
+  // ---- outbound clicks: what they clicked --------------------------------
+  // Delegated capture-phase listener on links leaving this page. The event
+  // string carries a short host+path label so the sheet shows WHICH link was
+  // followed. In-page anchors, mailto/tel and non-http schemes are ignored.
+  document.addEventListener('click', function(e){
+    try {
+      var a = e.target && e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var raw = a.getAttribute('href') || '';
+      if (/^(#|javascript:|mailto:|tel:|sms:)/i.test(raw)) return;
+      var u; try { u = new URL(a.href, location.href); } catch (_) { return; }
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return;
+      var path = (u.pathname && u.pathname !== '/') ? u.pathname : '';
+      var label = (u.host.replace(/^www\./, '') + path).slice(0, 24);
+      sendRaw('click:' + label, 0);
+    } catch (err) { /* never let tracking break a click */ }
+  }, true);
+})();
+</script>
+</body>
+</html>
